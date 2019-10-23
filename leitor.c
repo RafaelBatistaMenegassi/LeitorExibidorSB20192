@@ -13,19 +13,20 @@ Alunos:
 */
 
 #include "leitor.h"
+#include <string.h>
 
 /*Macro para leitura de um tipo u1 do arquivo .class*/
-#define u1READ(fd) getc(fd)
+#define u1READ(arq) getc(arq)
 /*Macro para leitura de um tipo u2 do arquivo .class*/
-#define u2READ(fd) (getc(fd) << 8) | getc(fd)
+#define u2READ(arq) (getc(arq) << 8) | getc(arq)
 /*Macro para leitura de um tipo u4 do arquivo .class*/
-#define u4READ(fd) (getc(fd) << 24) | (getc(fd) << 16 | getc(fd) << 8 | getc(fd))
+#define u4READ(arq) (getc(arq) << 24) | (getc(arq) << 16 | getc(arq) << 8 | getc(arq))
 
 ClassFile* lerArquivo (ClassFile* cf, char *nomeArquivo)
 {
     FILE *fp = fopen(nomeArquivo, "rb"); // abre o arquivo .class em modo leitura binario
 
-    if(!fp){
+    if(!fp){ // se nao encontrou arquivo ou nao conseguiu abrir, encerra o programa
       printf("Erro na abertura do arquivo .class, o programa sera encerrado...\n");
       exit(0);
     }
@@ -49,12 +50,8 @@ ClassFile* lerArquivo (ClassFile* cf, char *nomeArquivo)
     cf->fields = (cf->fields_count > 0) ?
                  lerFields(fp, cf->fields, cf->fields_count, cf->constant_pool) : NULL;
 
-    // printf("Passou leitura field\n");
-
-    /*Leitura do valor 'methods_count', representando
-    a quantidade de entradas na tabela Method*/
+    /*Leitura do valor 'methods_count' = quantidade de entradas na tabela Method*/
     cf->methods_count = u2READ(fp);
-    //printf("Metodos: %d\n",arquivoClass->methods_count);
     cf->methods = (cf->methods_count > 0) ?
                    lerMetodos(fp, cf->methods, cf->methods_count, cf->constant_pool) : NULL;  // ASS: (FILE *fp, method_info* metodo, u2 m_count, cp_info *cp)
 
@@ -181,7 +178,7 @@ field_info* lerFields (FILE *fp, field_info *field, u2 f_count, cp_info *cp)
   		if (p->attributes_count > 0) {
   			p->attributes = (attribute_info **) malloc(p->attributes_count * sizeof(attribute_info*));
   			for (int i = 0; i < p->attributes_count; p++) {
-  				*(p->attributes + i) = lerAtributos(fp, p->attributes, cp); // ASS: (FILE *fp, attribute_info* a, cp_info *cp)
+  				*(p->attributes + i) = lerAtributos(fp, *(p->attributes + i), cp); // ASS: (FILE *fp, attribute_info* a, cp_info *cp)
   			}
   		}
     }
@@ -217,7 +214,7 @@ method_info* lerMetodos (FILE *fp, method_info* metodo, u2 m_count, cp_info *cp)
 
   return metodo;
 }
-
+/*
 char* decodificarCode(cp_info *cp, u2 sizeCP, u1 *code, u4 length,instrucao *instrucoes){
 	u1 *aux;
 
@@ -278,7 +275,7 @@ char* decodificarCode(cp_info *cp, u2 sizeCP, u1 *code, u4 length,instrucao *ins
 	//free(stringaux); - Esse free da problema.
 	return(retorno);
 }
-
+*/
 code_attribute* lerCode (FILE * fp, cp_info *cp)
 {
 	code_attribute * code_attributes = NULL;
@@ -306,8 +303,8 @@ code_attribute* lerCode (FILE * fp, cp_info *cp)
 
 	if (code_attributes->attributes_count > 0){
 		code_attributes->attributes = (attribute_info**)malloc(code_attributes->attributes_count*sizeof(attribute_info*));
-		for (int posicao = 0; posicao < code_attributes->attributes_count; posicao++) {
-			*(code_attributes->attributes+posicao) = lerAtributos(fp, code_attributes->attributes, cp);
+		for (int i = 0; i < code_attributes->attributes_count; i++) {
+			*(code_attributes->attributes + i) = lerAtributos(fp, *(code_attributes->attributes + i), cp);
 		}
 	}
 
@@ -535,7 +532,7 @@ verification_type_info* lerVerificationTypeInfo (FILE *fp)
 	return VTI;
 }
 
-source_file_attribute* lerSourceFile (FILE *fp) 
+source_file_attribute* lerSourceFile (FILE *fp)
 {
 	source_file_attribute * SourceFile = NULL;
 	SourceFile = (source_file_attribute*)malloc(sizeof(source_file_attribute));

@@ -5,7 +5,7 @@
 #include "leitor.h"
 #include "exibidor.h"
 
-int main (int argc, char const *argv[])
+int main (int argc, char *argv[])
 {
   ClassFile *class_file;
   char *nomeArquivo; // ponteiro para o arquivo .class

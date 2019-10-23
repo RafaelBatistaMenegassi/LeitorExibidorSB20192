@@ -3,18 +3,18 @@ Universidade de Brasília - 02/2019
 Software Básico - Turma A
 Leitor/Exibidor de arquivo .class
 
-Alunos: 
-    Brenda 
+Alunos:
+    Brenda
     Jéssica Oliveira
-    Rafael Alencar  
-    Rafael Batista  
+    Rafael Alencar
+    Rafael Batista
     Rodrigo Cardoso
 
 */
 
 #include "exibidor.h"
 #include <string.h>
-#include "instrucoes.h"
+#include <math.h>
 #include "leitor.h"
 
 char* buscaNomeTag(u1 tag){
@@ -82,7 +82,7 @@ char* decodificaStringUTF8(cp_info *cp){
 
 	return(retorno);
 }
-
+/*
 char* decodificarOperandoInstrucao(cp_info *cp,u2 index, u2 sizeCP){
 
 	char *retorno = malloc(100*sizeof(char));
@@ -152,7 +152,7 @@ char* decodificarOperandoInstrucao(cp_info *cp,u2 index, u2 sizeCP){
 	}
 	return(retorno);
 }
-
+*/
 // LEMBRAR QUE CP INFO COMEÇA DE 1, POR ISSO QUE SUBTRAI 1 NA SOMA
 // Decodifica Name Index e Name Type
 char* decodificaNIeNT(cp_info *cp, u2 index, u1 tipo){
@@ -301,7 +301,7 @@ double decodificaDoubleInfo (cp_info * cp) {
 	 int expon = ((valor>>52) & 0x7ffL);
 	 long mant = (expon == 0) ? ((valor & 0xfffffffffffffL) << 1) : ((valor & 0xfffffffffffffL) | 0x10000000000000L);
 
-	double retorno = sinal*mant*(pow(2,expon-1075));
+	double retorno = sinal * mant *( pow(2,expon-1075) );
 	return retorno;
 }
 
@@ -309,12 +309,15 @@ uint64_t decodificaLongInfo (cp_info * cp) {
 	return ((((uint64_t)cp->cp_union.Long.hi_bytes)<<32) | ((uint64_t)cp->cp_union.Long.lo_bytes));
 }
 
+/*
 int decodificaIntegerInfo (cp_info * cp) {
 
 	u4 valor = cp->cp_union.Integer.bytes;
 	return valor;
 }
+*/
 
+/*
 float decodificaFloatInfo (cp_info * cp) {
 	u4 valor = cp->cp_union.Float.bytes;
 	float retorno;
@@ -324,7 +327,7 @@ float decodificaFloatInfo (cp_info * cp) {
 	retorno = (sinal)*(mant)*(pow(2,expon-150));
 	return retorno;
 }
-
+*/
 
 int setaOffsetImpressao (int posicao, u1 offset) {
 
@@ -347,7 +350,7 @@ void imprimirClassFile (ClassFile * arquivoClass){
 	uint32_t contador = 1;
 	char *ponteiroprint;
 
-	instrucao *instrucoes = construirInstrucoes();
+//	instrucao *instrucoes = construirInstrucoes();
 
 	printf("\n-----INFO-----\n\n");
 	printf("Magic: %08x\n",arquivoClass->magic);
@@ -364,7 +367,7 @@ void imprimirClassFile (ClassFile * arquivoClass){
 
 
 	printf("\n\n-----CONSTANT POOL-----\n\n");
-	
+
     for (aux = arquivoClass->constant_pool; aux < arquivoClass->constant_pool+arquivoClass->constant_pool_count-1; aux++) {
         printf("--------------Entrada [%d]--------------\n",contador);
         contador++;
@@ -448,62 +451,62 @@ void imprimirClassFile (ClassFile * arquivoClass){
         }
     }
 
-	printf("\n\n-----INTERFACES-----\n\n");
-	contador = 0;
-	for (u2 * auxInterfaces = arquivoClass->interfaces; auxInterfaces < arquivoClass->interfaces+arquivoClass->interfaces_count; auxInterfaces++) {
-		ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,*auxInterfaces,NAME_INDEX);
-		printf("Interface: cp_info#%d <%s>\n",*auxInterfaces, ponteiroprint);
-	}
+	// printf("\n\n-----INTERFACES-----\n\n");
+	// contador = 0;
+	// for (u2 * auxInterfaces = arquivoClass->interfaces; auxInterfaces < arquivoClass->interfaces+arquivoClass->interfaces_count; auxInterfaces++) {
+	// 	ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,*auxInterfaces,NAME_INDEX);
+	// 	printf("Interface: cp_info#%d <%s>\n",*auxInterfaces, ponteiroprint);
+	// }
 
 
-	printf("\n\n-----FIELDS-----\n\n");
-	contador = 0;
-	for (auxField = arquivoClass->fields; auxField < arquivoClass->fields + arquivoClass->fields_count; auxField++,contador++) {
-		printf("--------------Field [%d]--------------\n\n",contador);
-		ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+auxField->name);
-		printf("Name: cp_info#%d <%s>\n",auxField->name,ponteiroprint);
-		ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+auxField->descriptor);
-		printf("Descriptor: cp_info#%d <%s>\n",auxField->descriptor,ponteiroprint);
-		ponteiroprint = decodificaAccessFlags(auxField->access_flags);
-		printf("Access Flags: 0x%04x [%s]\n",auxField->access_flags,ponteiroprint);
-		printf("Attributes Count: %d\n",auxField->attributes_count);
-		if (auxField->attributes_count > 0) {
-			fieldAttrAux = auxField->attributes;
-			for (int posicaoFields = 0; posicaoFields < auxField->attributes_count; posicaoFields++) {
-				ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+(*(fieldAttrAux+posicaoFields))->attribute_name);
-				printf("Attribute Name Index: cp_info#%d <%s>\n",(*(fieldAttrAux+posicaoFields))->attribute_name,ponteiroprint);
-				printf("Attribute Length: %d\n",(*(fieldAttrAux+posicaoFields))->attribute_length);
-				if (strcmp(ponteiroprint, "ConstantValue") == 0) {
-					constant_value_attribute * cvAux = (constant_value_attribute*)(*(fieldAttrAux+posicaoFields))->info;
-					cp_info * cpInfoAux = arquivoClass->constant_pool-1+cvAux->constant_value;
-					//FLOAT
-					if (cpInfoAux->tag == 4) {
-						float valorCV = decodificaFloatInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
-						printf("Constant Value Index: cp_info#%d <%f>\n",cvAux->constant_value,valorCV);
-					//Integer-Byte-Boolean-Short-Char
-					} else if (cpInfoAux->tag == 3) {
-						int valorRetorno = decodificaIntegerInfo (arquivoClass->constant_pool-1+cvAux->constant_value);
-						printf("Constant Value Index: cp_info#%d <%d>\n",cvAux->constant_value,valorRetorno);
-					//STRING
-					} else if (cpInfoAux->tag == 8) {
-						char * stringEntrada = decodificaNIeNT(arquivoClass->constant_pool,cvAux->constant_value,NAME_INDEX);
-						printf("Constant Value Index: cp_info#%d <%s>\n",cvAux->constant_value,stringEntrada);
-					//DOUBLE
-					} else if (cpInfoAux->tag == 6) {
-						double valorDB = decodificaDoubleInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
-						printf("Constant Value Index: cp_info#%d <%lf>\n",cvAux->constant_value,valorDB);
-					} else if (cpInfoAux->tag == 5) {
-						uint64_t valorL = decodificaLongInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
-						printf("Constant Value Index: cp_info#%d <%lu>\n",cvAux->constant_value,valorL);
-					}
-				} else if (strcmp(ponteiroprint,"Signature") == 0) {
-					signature_attribute * sig = (signature_attribute*)(*(fieldAttrAux+posicaoFields))->info;
-					char * Signature_Index = decodificaStringUTF8(arquivoClass->constant_pool-1+sig->signature);
-					printf("Signature index: cp_info#%d <%s>\n",sig->signature,Signature_Index);
-				}
-			}
-		}
-	}
+	// printf("\n\n-----FIELDS-----\n\n");
+	// contador = 0;
+	// for (auxField = arquivoClass->fields; auxField < arquivoClass->fields + arquivoClass->fields_count; auxField++,contador++) {
+	// 	printf("--------------Field [%d]--------------\n\n",contador);
+	// 	ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+auxField->name);
+	// 	printf("Name: cp_info#%d <%s>\n",auxField->name,ponteiroprint);
+	// 	ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+auxField->descriptor);
+	// 	printf("Descriptor: cp_info#%d <%s>\n",auxField->descriptor,ponteiroprint);
+	// 	ponteiroprint = decodificaAccessFlags(auxField->access_flags);
+	// 	printf("Access Flags: 0x%04x [%s]\n",auxField->access_flags,ponteiroprint);
+	// 	printf("Attributes Count: %d\n",auxField->attributes_count);
+	// 	if (auxField->attributes_count > 0) {
+	// 		fieldAttrAux = auxField->attributes;
+	// 		for (int posicaoFields = 0; posicaoFields < auxField->attributes_count; posicaoFields++) {
+	// 			ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+(*(fieldAttrAux+posicaoFields))->attribute_name);
+	// 			printf("Attribute Name Index: cp_info#%d <%s>\n",(*(fieldAttrAux+posicaoFields))->attribute_name,ponteiroprint);
+	// 			printf("Attribute Length: %d\n",(*(fieldAttrAux+posicaoFields))->attribute_length);
+	// 			if (strcmp(ponteiroprint, "ConstantValue") == 0) {
+	// 				constant_value_attribute * cvAux = (constant_value_attribute*)(*(fieldAttrAux+posicaoFields))->info;
+	// 				cp_info * cpInfoAux = arquivoClass->constant_pool-1+cvAux->constant_value;
+	// 				//FLOAT
+	// 				if (cpInfoAux->tag == 4) {
+	// 					float valorCV = decodificaFloatInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
+	// 					printf("Constant Value Index: cp_info#%d <%f>\n",cvAux->constant_value,valorCV);
+	// 				//Integer-Byte-Boolean-Short-Char
+	// 				} else if (cpInfoAux->tag == 3) {
+	// 					int valorRetorno = decodificaIntegerInfo (arquivoClass->constant_pool-1+cvAux->constant_value);
+	// 					printf("Constant Value Index: cp_info#%d <%d>\n",cvAux->constant_value,valorRetorno);
+	// 				//STRING
+	// 				} else if (cpInfoAux->tag == 8) {
+	// 					char * stringEntrada = decodificaNIeNT(arquivoClass->constant_pool,cvAux->constant_value,NAME_INDEX);
+	// 					printf("Constant Value Index: cp_info#%d <%s>\n",cvAux->constant_value,stringEntrada);
+	// 				//DOUBLE
+	// 				} else if (cpInfoAux->tag == 6) {
+	// 					double valorDB = decodificaDoubleInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
+	// 					printf("Constant Value Index: cp_info#%d <%lf>\n",cvAux->constant_value,valorDB);
+	// 				} else if (cpInfoAux->tag == 5) {
+	// 					uint64_t valorL = decodificaLongInfo(arquivoClass->constant_pool-1+cvAux->constant_value);
+	// 					printf("Constant Value Index: cp_info#%d <%lu>\n",cvAux->constant_value,valorL);
+	// 				}
+	// 			} else if (strcmp(ponteiroprint,"Signature") == 0) {
+	// 				signature_attribute * sig = (signature_attribute*)(*(fieldAttrAux+posicaoFields))->info;
+	// 				char * Signature_Index = decodificaStringUTF8(arquivoClass->constant_pool-1+sig->signature);
+	// 				printf("Signature index: cp_info#%d <%s>\n",sig->signature,Signature_Index);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	printf("\n\n-----METODOS-----\n\n");
 
@@ -531,237 +534,237 @@ void imprimirClassFile (ClassFile * arquivoClass){
 				printf("Max Stack: %d\n",auxCodePontual->max_stack);
 				printf("Max Locals: %d\n",auxCodePontual->max_locals);
 				printf("Code length: %d\n",auxCodePontual->code_length);
-				printf("\n\n----Code----\n\n");
-				if(auxCodePontual->code_length > 0) {
-					ponteiroprint = decodificarCode(arquivoClass->constant_pool,arquivoClass->constant_pool_count,auxCodePontual->code,auxCodePontual->code_length,instrucoes);
-					printf("%s\n",ponteiroprint);
-				}
-				if(auxCodePontual->exception_info_length > 0) {
-					printf("Exception Table:\n");
-					printf("Nr.\t\tStart PC\tEnd PC\tHandler PC\tCatch Type\n");
-					int contadorExceptionTable = 0;
-					for(exceptionTableAux = auxCodePontual->ex_info; exceptionTableAux < auxCodePontual->ex_info + auxCodePontual->exception_info_length; exceptionTableAux++){
-						printf("%d\t\t%02x\t\t%02x\t\t%02x\t%02x\n",contadorExceptionTable,exceptionTableAux->start_pc,exceptionTableAux->end_pc,exceptionTableAux->handler_pc,exceptionTableAux->catch_type);
-						contadorExceptionTable++;
-					}
-					printf("\n\n");
-				}
-				printf("Attributes Count: %d\n",auxCodePontual->attributes_count);
-				if (auxCodePontual->attributes_count > 0) {
-					int lntContador = 0;
-					attribute_info ** auxAttributesFromCode = auxCodePontual->attributes;
-					for (int posicaoDois = 0; posicaoDois < auxCodePontual->attributes_count; posicaoDois++) {
-						ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+(*(auxAttributesFromCode+posicaoDois))->attribute_name);
-						printf("Attribute Name Index: cp_info#%d <%s>\n",(*(auxAttributesFromCode+posicaoDois))->attribute_name,ponteiroprint);
-						printf("Attribute Length: %d\n",(*(auxAttributesFromCode+posicaoDois))->attribute_length);
-						if (strcmp(ponteiroprint,"LineNumberTable") == 0) {
-							line_number_table * lntAux = (line_number_table*)(*(auxAttributesFromCode+posicaoDois))->info;
-							printf("Line Number Table Length: %d\n",(int)lntAux->line_number_length);
-							printf("Attribute Info: \n");
-							printf("Nr.\t\tStartPC\t\tLineNumber\n");
-							for (line_number_info * linfo = lntAux->info; linfo < lntAux->info + lntAux->line_number_length; linfo++) {
-								printf("%d\t\t%d\t\t%d\n",lntContador,linfo->start_pc,linfo->line_number);
-								lntContador++;
-							}
-							printf("\n");
-						} else if (strcmp(ponteiroprint,"StackMapTable") == 0) {
-							int offsetImpressao = 0;
-							stack_map_attribute * smt = (stack_map_attribute*)(*(auxAttributesFromCode+posicaoDois))->info;
-							stack_map_frame ** smf = smt->entries;
-							printf("Nr.\t\tStack Map Frame\n");
-							for (int posicaoSMF = 0; posicaoSMF < smt->num_entries; posicaoSMF++) {
-								if ((*(smf+posicaoSMF))->frame_type >= 0 && (*(smf+posicaoSMF))->frame_type <= 63) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->frame_type);
-									printf("%d\t\tSAME(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,(*(smf+posicaoSMF))->frame_type);
-								} else if ((*(smf+posicaoSMF))->frame_type >= 64 && (*(smf+posicaoSMF))->frame_type <= 127) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,((*(smf+posicaoSMF))->frame_type)-64);
-									printf("%d\t\tSAME_LOCALS_1_STACK_ITEM(%d), Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,((*(smf+posicaoSMF))->frame_type-64));
-									printf("\t\tStack verifications:\n");
-									verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame.stack;
-									switch ((*(VTIAux))->tag) {
-										case 0:
-											printf("\t\t\tTOP\n");
-											break;
-										case 1:
-											printf("\t\t\tINTEGER\n");
-											break;
-										case 2:
-											printf("\t\t\tFLOAT\n");
-											break;
-										case 3:
-											printf("\t\t\tLONG\n");
-											break;
-										case 4:
-											printf("\t\t\tDOUBLE\n");
-											break;
-										case 5:
-											printf("\t\t\tNULL\n");
-											break;
-										case 6:
-											printf("\t\t\tUNINITIALIZED THIS\n");
-											break;
-										case 7:
-											ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux))->type_info.object_variable_info.cp,NAME_INDEX);
-											printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux))->type_info.object_variable_info.cp, ponteiroprint);
-											break;
-										case 8:
-											printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux))->type_info.uninitialized_variable_info.offset);
-											break;
-									}
-								} else if ((*(smf+posicaoSMF))->frame_type == 247) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.offset_delta);
-									printf("%d\t\tSAME_LOCALS_1_STACK_ITEM_EXTENDED(%d), Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.offset_delta);
-									printf("\t\tStack verifications:\n");
-									verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.stack;
-									switch ((*(VTIAux))->tag) {
-										case 0:
-											printf("\t\t\tTOP\n");
-											break;
-										case 1:
-											printf("\t\t\tINTEGER\n");
-											break;
-										case 2:
-											printf("\t\t\tFLOAT\n");
-											break;
-										case 3:
-											printf("\t\t\tLONG\n");
-											break;
-										case 4:
-											printf("\t\t\tDOUBLE\n");
-											break;
-										case 5:
-											printf("\t\t\tNULL\n");
-											break;
-										case 6:
-											printf("\t\t\tUNINITIALIZED THIS\n");
-											break;
-										case 7:
-											ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux))->type_info.object_variable_info.cp,NAME_INDEX);
-											printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux))->type_info.object_variable_info.cp, ponteiroprint);
-											break;
-										case 8:
-											printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux))->type_info.uninitialized_variable_info.offset);
-											break;
-									}
-								} else if ((*(smf+posicaoSMF))->frame_type >= 248 && (*(smf+posicaoSMF))->frame_type <= 250) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.chop_frame.offset_delta);
-									printf("%d\t\tCHOP(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.chop_frame.offset_delta);
-								} else if ((*(smf+posicaoSMF))->frame_type == 251) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.same_frame_extended.offset_delta);
-									printf("%d\t\tSAME_FRAME_EXTENDED(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.same_frame_extended.offset_delta);
-								} else if ((*(smf+posicaoSMF))->frame_type >= 252 && (*(smf+posicaoSMF))->frame_type <= 254) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.append_frame.offset_delta);
-									printf("%d\t\tAPPEND(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao, (*(smf+posicaoSMF))->map_frame_type.append_frame.offset_delta);
-									verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.append_frame.locals;
-									printf("\t\t  Local verifications:\n");
-									for (int posicaoVTI = 0; posicaoVTI < ((*(smf+posicaoSMF))->frame_type-251); posicaoVTI++) {
-										switch ((*(VTIAux+posicaoVTI))->tag) {
-											case 0:
-												printf("\t\t\tTOP\n");
-												break;
-											case 1:
-												printf("\t\t\tINTEGER\n");
-												break;
-											case 2:
-												printf("\t\t\tFLOAT\n");
-												break;
-											case 3:
-												printf("\t\t\tLONG\n");
-												break;
-											case 4:
-												printf("\t\t\tDOUBLE\n");
-												break;
-											case 5:
-												printf("\t\t\tNULL\n");
-												break;
-											case 6:
-												printf("\t\t\tUNINITIALIZED THIS\n");
-												break;
-											case 7:
-												ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
-												printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
-												break;
-											case 8:
-												printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
-												break;
-										}
-									}
-								} else if ((*(smf+posicaoSMF))->frame_type == 255) {
-									offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.full_frame.offset_delta);
-									printf("%d\t\tFULL_FRAME(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao, (*(smf+posicaoSMF))->map_frame_type.full_frame.offset_delta);
-									verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.full_frame.locals;
-									printf("\t\t  Local verifications:\n");
-									for (int posicaoVTI = 0; posicaoVTI < (*(smf+posicaoSMF))->map_frame_type.full_frame.num_locals; posicaoVTI++) {
-										switch ((*(VTIAux+posicaoVTI))->tag) {
-											case 0:
-												printf("\t\t\tTOP\n");
-												break;
-											case 1:
-												printf("\t\t\tINTEGER\n");
-												break;
-											case 2:
-												printf("\t\t\tFLOAT\n");
-												break;
-											case 3:
-												printf("\t\t\tLONG\n");
-												break;
-											case 4:
-												printf("\t\t\tDOUBLE\n");
-												break;
-											case 5:
-												printf("\t\t\tNULL\n");
-												break;
-											case 6:
-												printf("\t\t\tUNINITIALIZED THIS\n");
-												break;
-											case 7:
-												ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
-												printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
-												break;
-											case 8:
-												printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
-												break;
-										}
-									}
-									VTIAux = (*(smf+posicaoSMF))->map_frame_type.full_frame.stack;
-									printf("\t\t  Stack verifications:\n");
-									for (int posicaoVTI = 0; posicaoVTI < (*(smf+posicaoSMF))->map_frame_type.full_frame.num_stack_items; posicaoVTI++) {
-										switch ((*(VTIAux+posicaoVTI))->tag) {
-											case 0:
-												printf("\t\t\tTOP\n");
-												break;
-											case 1:
-												printf("\t\t\tINTEGER\n");
-												break;
-											case 2:
-												printf("\t\t\tFLOAT\n");
-												break;
-											case 3:
-												printf("\t\t\tLONG\n");
-												break;
-											case 4:
-												printf("\t\t\tDOUBLE\n");
-												break;
-											case 5:
-												printf("\t\t\tNULL\n");
-												break;
-											case 6:
-												printf("\t\t\tUNINITIALIZED THIS\n");
-												break;
-											case 7:
-												ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
-												printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
-												break;
-											case 8:
-												printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
-												break;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				// printf("\n\n----Code----\n\n");
+				// if(auxCodePontual->code_length > 0) {
+				// 	ponteiroprint = decodificarCode(arquivoClass->constant_pool,arquivoClass->constant_pool_count,auxCodePontual->code,auxCodePontual->code_length,instrucoes);
+				// 	printf("%s\n",ponteiroprint);
+				// }
+				// if(auxCodePontual->exception_info_length > 0) {
+				// 	printf("Exception Table:\n");
+				// 	printf("Nr.\t\tStart PC\tEnd PC\tHandler PC\tCatch Type\n");
+				// 	int contadorExceptionTable = 0;
+				// 	for(exceptionTableAux = auxCodePontual->ex_info; exceptionTableAux < auxCodePontual->ex_info + auxCodePontual->exception_info_length; exceptionTableAux++){
+				// 		printf("%d\t\t%02x\t\t%02x\t\t%02x\t%02x\n",contadorExceptionTable,exceptionTableAux->start_pc,exceptionTableAux->end_pc,exceptionTableAux->handler_pc,exceptionTableAux->catch_type);
+				// 		contadorExceptionTable++;
+				// 	}
+				// 	printf("\n\n");
+				// }
+				// printf("Attributes Count: %d\n",auxCodePontual->attributes_count);
+				// if (auxCodePontual->attributes_count > 0) {
+				// 	int lntContador = 0;
+				// 	attribute_info ** auxAttributesFromCode = auxCodePontual->attributes;
+				// 	for (int posicaoDois = 0; posicaoDois < auxCodePontual->attributes_count; posicaoDois++) {
+				// 		ponteiroprint = decodificaStringUTF8(arquivoClass->constant_pool-1+(*(auxAttributesFromCode+posicaoDois))->attribute_name);
+				// 		printf("Attribute Name Index: cp_info#%d <%s>\n",(*(auxAttributesFromCode+posicaoDois))->attribute_name,ponteiroprint);
+				// 		printf("Attribute Length: %d\n",(*(auxAttributesFromCode+posicaoDois))->attribute_length);
+				// 		if (strcmp(ponteiroprint,"LineNumberTable") == 0) {
+				// 			line_number_table * lntAux = (line_number_table*)(*(auxAttributesFromCode+posicaoDois))->info;
+				// 			printf("Line Number Table Length: %d\n",(int)lntAux->line_number_length);
+				// 			printf("Attribute Info: \n");
+				// 			printf("Nr.\t\tStartPC\t\tLineNumber\n");
+				// 			for (line_number_info * linfo = lntAux->info; linfo < lntAux->info + lntAux->line_number_length; linfo++) {
+				// 				printf("%d\t\t%d\t\t%d\n",lntContador,linfo->start_pc,linfo->line_number);
+				// 				lntContador++;
+				// 			}
+				// 			printf("\n");
+				// 		} else if (strcmp(ponteiroprint,"StackMapTable") == 0) {
+				// 			int offsetImpressao = 0;
+				// 			stack_map_attribute * smt = (stack_map_attribute*)(*(auxAttributesFromCode+posicaoDois))->info;
+				// 			stack_map_frame ** smf = smt->entries;
+				// 			printf("Nr.\t\tStack Map Frame\n");
+				// 			for (int posicaoSMF = 0; posicaoSMF < smt->num_entries; posicaoSMF++) {
+				// 				if ((*(smf+posicaoSMF))->frame_type >= 0 && (*(smf+posicaoSMF))->frame_type <= 63) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->frame_type);
+				// 					printf("%d\t\tSAME(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,(*(smf+posicaoSMF))->frame_type);
+				// 				} else if ((*(smf+posicaoSMF))->frame_type >= 64 && (*(smf+posicaoSMF))->frame_type <= 127) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,((*(smf+posicaoSMF))->frame_type)-64);
+				// 					printf("%d\t\tSAME_LOCALS_1_STACK_ITEM(%d), Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,((*(smf+posicaoSMF))->frame_type-64));
+				// 					printf("\t\tStack verifications:\n");
+				// 					verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame.stack;
+				// 					switch ((*(VTIAux))->tag) {
+				// 						case 0:
+				// 							printf("\t\t\tTOP\n");
+				// 							break;
+				// 						case 1:
+				// 							printf("\t\t\tINTEGER\n");
+				// 							break;
+				// 						case 2:
+				// 							printf("\t\t\tFLOAT\n");
+				// 							break;
+				// 						case 3:
+				// 							printf("\t\t\tLONG\n");
+				// 							break;
+				// 						case 4:
+				// 							printf("\t\t\tDOUBLE\n");
+				// 							break;
+				// 						case 5:
+				// 							printf("\t\t\tNULL\n");
+				// 							break;
+				// 						case 6:
+				// 							printf("\t\t\tUNINITIALIZED THIS\n");
+				// 							break;
+				// 						case 7:
+				// 							ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux))->type_info.object_variable_info.cp,NAME_INDEX);
+				// 							printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux))->type_info.object_variable_info.cp, ponteiroprint);
+				// 							break;
+				// 						case 8:
+				// 							printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux))->type_info.uninitialized_variable_info.offset);
+				// 							break;
+				// 					}
+				// 				} else if ((*(smf+posicaoSMF))->frame_type == 247) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.offset_delta);
+				// 					printf("%d\t\tSAME_LOCALS_1_STACK_ITEM_EXTENDED(%d), Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type,offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.offset_delta);
+				// 					printf("\t\tStack verifications:\n");
+				// 					verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.same_locals_1_stack_item_frame_extended.stack;
+				// 					switch ((*(VTIAux))->tag) {
+				// 						case 0:
+				// 							printf("\t\t\tTOP\n");
+				// 							break;
+				// 						case 1:
+				// 							printf("\t\t\tINTEGER\n");
+				// 							break;
+				// 						case 2:
+				// 							printf("\t\t\tFLOAT\n");
+				// 							break;
+				// 						case 3:
+				// 							printf("\t\t\tLONG\n");
+				// 							break;
+				// 						case 4:
+				// 							printf("\t\t\tDOUBLE\n");
+				// 							break;
+				// 						case 5:
+				// 							printf("\t\t\tNULL\n");
+				// 							break;
+				// 						case 6:
+				// 							printf("\t\t\tUNINITIALIZED THIS\n");
+				// 							break;
+				// 						case 7:
+				// 							ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux))->type_info.object_variable_info.cp,NAME_INDEX);
+				// 							printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux))->type_info.object_variable_info.cp, ponteiroprint);
+				// 							break;
+				// 						case 8:
+				// 							printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux))->type_info.uninitialized_variable_info.offset);
+				// 							break;
+				// 					}
+				// 				} else if ((*(smf+posicaoSMF))->frame_type >= 248 && (*(smf+posicaoSMF))->frame_type <= 250) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.chop_frame.offset_delta);
+				// 					printf("%d\t\tCHOP(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.chop_frame.offset_delta);
+				// 				} else if ((*(smf+posicaoSMF))->frame_type == 251) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.same_frame_extended.offset_delta);
+				// 					printf("%d\t\tSAME_FRAME_EXTENDED(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao,(*(smf+posicaoSMF))->map_frame_type.same_frame_extended.offset_delta);
+				// 				} else if ((*(smf+posicaoSMF))->frame_type >= 252 && (*(smf+posicaoSMF))->frame_type <= 254) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.append_frame.offset_delta);
+				// 					printf("%d\t\tAPPEND(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao, (*(smf+posicaoSMF))->map_frame_type.append_frame.offset_delta);
+				// 					verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.append_frame.locals;
+				// 					printf("\t\t  Local verifications:\n");
+				// 					for (int posicaoVTI = 0; posicaoVTI < ((*(smf+posicaoSMF))->frame_type-251); posicaoVTI++) {
+				// 						switch ((*(VTIAux+posicaoVTI))->tag) {
+				// 							case 0:
+				// 								printf("\t\t\tTOP\n");
+				// 								break;
+				// 							case 1:
+				// 								printf("\t\t\tINTEGER\n");
+				// 								break;
+				// 							case 2:
+				// 								printf("\t\t\tFLOAT\n");
+				// 								break;
+				// 							case 3:
+				// 								printf("\t\t\tLONG\n");
+				// 								break;
+				// 							case 4:
+				// 								printf("\t\t\tDOUBLE\n");
+				// 								break;
+				// 							case 5:
+				// 								printf("\t\t\tNULL\n");
+				// 								break;
+				// 							case 6:
+				// 								printf("\t\t\tUNINITIALIZED THIS\n");
+				// 								break;
+				// 							case 7:
+				// 								ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
+				// 								printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
+				// 								break;
+				// 							case 8:
+				// 								printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
+				// 								break;
+				// 						}
+				// 					}
+				// 				} else if ((*(smf+posicaoSMF))->frame_type == 255) {
+				// 					offsetImpressao += setaOffsetImpressao(posicaoSMF,(*(smf+posicaoSMF))->map_frame_type.full_frame.offset_delta);
+				// 					printf("%d\t\tFULL_FRAME(%d),Offset: %d(+%d)\n",posicaoSMF,(*(smf+posicaoSMF))->frame_type, offsetImpressao, (*(smf+posicaoSMF))->map_frame_type.full_frame.offset_delta);
+				// 					verification_type_info ** VTIAux = (*(smf+posicaoSMF))->map_frame_type.full_frame.locals;
+				// 					printf("\t\t  Local verifications:\n");
+				// 					for (int posicaoVTI = 0; posicaoVTI < (*(smf+posicaoSMF))->map_frame_type.full_frame.num_locals; posicaoVTI++) {
+				// 						switch ((*(VTIAux+posicaoVTI))->tag) {
+				// 							case 0:
+				// 								printf("\t\t\tTOP\n");
+				// 								break;
+				// 							case 1:
+				// 								printf("\t\t\tINTEGER\n");
+				// 								break;
+				// 							case 2:
+				// 								printf("\t\t\tFLOAT\n");
+				// 								break;
+				// 							case 3:
+				// 								printf("\t\t\tLONG\n");
+				// 								break;
+				// 							case 4:
+				// 								printf("\t\t\tDOUBLE\n");
+				// 								break;
+				// 							case 5:
+				// 								printf("\t\t\tNULL\n");
+				// 								break;
+				// 							case 6:
+				// 								printf("\t\t\tUNINITIALIZED THIS\n");
+				// 								break;
+				// 							case 7:
+				// 								ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
+				// 								printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
+				// 								break;
+				// 							case 8:
+				// 								printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
+				// 								break;
+				// 						}
+				// 					}
+				// 					VTIAux = (*(smf+posicaoSMF))->map_frame_type.full_frame.stack;
+				// 					printf("\t\t  Stack verifications:\n");
+				// 					for (int posicaoVTI = 0; posicaoVTI < (*(smf+posicaoSMF))->map_frame_type.full_frame.num_stack_items; posicaoVTI++) {
+				// 						switch ((*(VTIAux+posicaoVTI))->tag) {
+				// 							case 0:
+				// 								printf("\t\t\tTOP\n");
+				// 								break;
+				// 							case 1:
+				// 								printf("\t\t\tINTEGER\n");
+				// 								break;
+				// 							case 2:
+				// 								printf("\t\t\tFLOAT\n");
+				// 								break;
+				// 							case 3:
+				// 								printf("\t\t\tLONG\n");
+				// 								break;
+				// 							case 4:
+				// 								printf("\t\t\tDOUBLE\n");
+				// 								break;
+				// 							case 5:
+				// 								printf("\t\t\tNULL\n");
+				// 								break;
+				// 							case 6:
+				// 								printf("\t\t\tUNINITIALIZED THIS\n");
+				// 								break;
+				// 							case 7:
+				// 								ponteiroprint = decodificaNIeNT(arquivoClass->constant_pool,(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp,NAME_INDEX);
+				// 								printf("\t\t\tOBJECT cp_info#%d <%s>\n",(*(VTIAux+posicaoVTI))->type_info.object_variable_info.cp, ponteiroprint);
+				// 								break;
+				// 							case 8:
+				// 								printf("\t\t\tUNINITIALIZED Offset: %d\n",(*(VTIAux+posicaoVTI))->type_info.uninitialized_variable_info.offset);
+				// 								break;
+				// 						}
+				// 					}
+				// 				}
+				// 			}
+				// 		}
+				// 	}
+				// }
 			} else if (strcmp(ponteiroprint,"Exceptions") == 0) {
 				exception_attribute * excpAux = (exception_attribute*)(*(auxAttrCompleto+posicao))->info;
 				int contadorExcp = 0;

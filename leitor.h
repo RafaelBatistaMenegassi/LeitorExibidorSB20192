@@ -6,8 +6,8 @@ Leitor/Exibidor de arquivo .class
 Alunos:
     Brenda Souza
     Jéssica Oliveira
-    Rafael Alencar 
-    Rafael Batista 
+    Rafael Alencar
+    Rafael Batista
     Rodrigo Cardoso
 
 */
