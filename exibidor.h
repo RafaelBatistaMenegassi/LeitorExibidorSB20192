@@ -1,24 +1,22 @@
 /*
 Universidade de Brasília - 02/2019
 Software Básico - Turma A
-Leitor/Exibidor de arquivo .class
 
 Alunos: 
-    Brenda - 
-    Jéssica - 
-    Rafael Alencar - 
-    Rafael Batista - 
-    Rodrigo -
+    Brenda Souza
+    Jéssica Oliveira
+    Rafael Alencar  
+    Rafael Batista  
+    Rodrigo Cardoso
 
 */
 
-#ifndef EXIBIDOR_H
-#define EXIBIDOR_H
+#ifndef EXIBIDOR_INIT
+#define EXIBIDOR_INIT
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "structures.h"
-#include "classFileStruct.h"
+#include "ClassFile.h"
 #include "instrucoes.h"
 
 char* buscaNomeTag(u1 tag);
@@ -32,7 +30,7 @@ uint64_t decodificaLongInfo (cp_info * cp);
 int decodificaIntegerInfo (cp_info * cp);
 float decodificaFloatInfo (cp_info * cp);
 int setaOffsetImpressao (int posicao, u1 offset);
-void imprimirClassFile (ClassFile *, FILE *);
+void imprimirClassFile (ClassFile *);
 
 
 #endif

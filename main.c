@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ClassFile.h"
+#include "leitor.h"
+#include "exibidor.h"
 
 int main (int argc, char const *argv[])
 {
-  //Classfile *class_file;
+  ClassFile *class_file;
   char *nomeArquivo; // ponteiro para o arquivo .class
 
   if(argc > 1) {
@@ -15,11 +18,11 @@ int main (int argc, char const *argv[])
     exit(0);
   }
 
-  class_file = (Classfile *) malloc(sizeof(Classfile));
+  class_file = (ClassFile *) malloc(sizeof(ClassFile));
 
-  class_file = leArquivo(class_file, nomeArquivo);
+  class_file = lerArquivo(class_file, nomeArquivo);
 
-  imprimeClassfile(class_file);
+  imprimirClassFile(class_file);
 
   return 0;
 }

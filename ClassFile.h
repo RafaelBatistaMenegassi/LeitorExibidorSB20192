@@ -1,20 +1,22 @@
 /*
-Software Básico - 2019/2
+Universidade de Brasília - 02/2019
+Software Básico - Turma A
 
-Brenda Souza
-Jéssica Oliveira
-Rafael Alencar
-Rafael Batista
-Rodrigo Cardoso
+Alunos:
+    Brenda Souza
+    Jéssica Oliveira
+    Rafael Alencar
+    Rafael Batista
+    Rodrigo Cardoso
 
 Projeto:
-Leitor/Exibidor
+    Leitor/Exibidor de arquivos .class.
 
 Arquivo:
-"ClassFile.h"
+    "ClassFile.h"
 
 Descrição:
-Especificação de estruturas relativas ao processamento de arquivos de extensão class.
+    Especificação de estruturas relativas ao processamento de arquivos de extensão class.
 */
 
 #ifndef CLASSFILE_INIT
@@ -66,6 +68,17 @@ typedef uint8_t     u1;
 typedef uint16_t    u2;
 typedef uint32_t    u4;
 
+#define NAME_INDEX 1
+#define NAME_AND_TYPE 2
+#define STRING_INDEX 3
+#define CLASS_INDEX 4
+#define NAME_AND_TYPE_INFO_NAME_INDEX 5
+#define NAME_AND_TYPE_INFO_DESCRIPTOR_INDEX 6
+#define FIELD_INDEX 7
+#define MAXU1 255
+#define MAXU2 65535
+#define MAXU4 2147483647
+
 // Informações sobre Constant Pool
 struct cp_info
 {
@@ -73,88 +86,88 @@ struct cp_info
     u1 tag; 
 
     // Union com tipos de entrada da CP
-    union cp_union
+    union 
     {
-        struct Class
+        struct 
         {
             u2 name;
-        };
+        } Class;
 
-        struct Field
+        struct 
         {
             u2 class_name;
             u2 name_and_type;
-        };
+        } Field;
         
-        struct Method
+        struct 
         {
             u2 class_name;
             u2 name_and_type;
-        };
+        } Method;
 
-        struct Interface
+        struct
         {
             u2 class_name;
             u2 name_and_type;
-        };
+        } InterfaceMethod;
         
-        struct String
+        struct 
         {
             u2 string;
-        };
+        } String;
         
-        struct Integer
+        struct 
         {
             u4 bytes;
-        };
+        } Integer;
         
-        struct Float
+        struct 
         {
             u4 bytes;
-        };
+        } Float;
         
-        struct Long
+        struct 
         {
             u4 hi_bytes;
             u4 lo_bytes;
-        };
+        } Long;
 
-        struct Double
+        struct 
         {
             u4 hi_bytes;
             u4 lo_bytes;
-        };
+        } Double;
         
-        struct NameAndType
+        struct 
         {
             u2 name;
             u2 descriptor;
-        };
+        } NameAndType;
         
-        struct Utf8
+        struct 
         {
             u1 *bytes;
             u2 length;
-        };
+        } Utf8;
         
-        struct MethodHandle
+        struct 
         {
             u1 reference_kind;
             u2 reference;
-        };
+        } MethodHandle;
 
-        struct MethodType
+        struct 
         {
             u2 descriptor;
-        };
+        } MethodType;
         
-        struct InvokeDynamic
+        struct 
         {
             u2 name_and_type;
-            u2 bootstrap_method_attr_index;
-        };        
+            u2 bootstrap_method_attr;
+        } InvokeDynamic;        
 
-    };
+    } cp_union;
 };
 
 typedef struct cp_info cp_info;
@@ -169,9 +182,9 @@ enum tag_values {
 	CONSTANT_Double                 = 6,
 	CONSTANT_Class                  = 7,
 	CONSTANT_String                 = 8,
-	CONSTANT_Fieldref               = 9,
-	CONSTANT_Methodref              = 10,
-	CONSTANT_InterfaceMethodref     = 11,
+	CONSTANT_Field                  = 9,
+	CONSTANT_Method                 = 10,
+	CONSTANT_InterfaceMethod        = 11,
 	CONSTANT_NameAndType            = 12,
 	CONSTANT_MethodHandle           = 15,
 	CONSTANT_MethodType             = 16,
@@ -208,7 +221,7 @@ struct field_info
 {
     u2 name;
     u2 descriptor;
-    u2 attrbutes_count;
+    u2 attributes_count;
     u2 access_flags;
 
     attribute_info **attributes;
@@ -243,6 +256,8 @@ struct line_number_table
     line_number_info *info;
     u2 line_number_length;
 };
+
+typedef struct line_number_table line_number_table;
 
 // Informações gerais de Código (Code)
 struct code_attribute
@@ -338,19 +353,19 @@ struct verification_type_info
     u1 tag;
 
     // Union de verificação de tipos
-    union verification_union
+    union
     {
-        struct object_variable_info
+        struct 
         {
             u2 cp;
-        };
+        } object_variable_info;
         
-        struct uninitialized_variable_info
+        struct 
         {
             u2 offset;
-        };
+        } uninitialized_variable_info;
         
-    };
+    } type_info;
 };
 
 typedef struct verification_type_info verification_type_info;
@@ -362,36 +377,36 @@ struct stack_map_frame
     u1 frame_type;
 
     // Union de tipos de Frames
-    union map_frame_type
+    union 
     {
-        struct same_locals_1_stack_item_frame
+        struct 
         {
             verification_type_info **stack;
-        };
+        } same_locals_1_stack_item_frame;
 
-        struct same_locals_1_stack_item_frame_extended
+        struct 
         {
             u2 offset_delta;
             verification_type_info **stack;
-        };        
+        } same_locals_1_stack_item_frame_extended;        
 
-        struct chop_frame
+        struct 
         {
             u2 offset_delta;
-        };
+        } chop_frame;
 
-        struct same_frame_extended
+        struct 
         {
             u2 offset_delta;
-        };
+        } same_frame_extended;
         
-        struct append_frame
+        struct 
         {
             u2 offset_delta;
             verification_type_info **locals;
-        };
+        } append_frame;
 
-        struct full_frame
+        struct 
         {
             u2 offset_delta;
             u2 num_locals;
@@ -399,8 +414,8 @@ struct stack_map_frame
 
             verification_type_info **locals;
             verification_type_info ** stack;
-        };        
-    };   
+        } full_frame;        
+    } map_frame_type;   
 };
 
 typedef struct stack_map_frame stack_map_frame;
@@ -426,13 +441,13 @@ struct ClassFile
     u2              constant_pool_count;    // The value of the constant_pool_count item is equal to the number of entries in the constant_pool table plus one.  
     cp_info         *constant_pool;         // The constant_pool is a table of structures (§4.4) representing various string constants, class and interface names, field names, and other constants that are referred to within the ClassFile structure and its substructures.
     u2              access_flags;           // The value of the access_flags item is a mask of flags used to denote access permissions to and properties of this class or interface.
-    u2              this_flags;             // The value of the this_class item must be a valid index into the constant_pool table.
+    u2              this_class;             // The value of the this_class item must be a valid index into the constant_pool table.
     u2              super_class;            // For a class, the value of the super_class item either must be zero or must be a valid index into the constant_pool table.
     u2              interfaces_count;       // The value of the interfaces_count item gives the number of direct superinterfaces of this class or interface type.
     u2              *interfaces;            // Each value in the interfaces array must be a valid index into the constant_pool table.
     u2              fields_count;           // The value of the fields_count item gives the number of field_info structures in the fields table.
     field_info      *fields;                // Each value in the fields table must be a field_info (§4.5) structure giving a complete description of a field in this class or interface.
-    u2              method_count;           // The value of the methods_count item gives the number of method_info structures in the methods table.
+    u2              methods_count;           // The value of the methods_count item gives the number of method_info structures in the methods table.
     method_info     *methods;               // Each value in the methods table must be a method_info (§4.6) structure giving a complete description of a method in this class or interface.
     u2              attributes_count;       // The value of the attributes_count item gives the number of attributes (§4.7) in the attributes table of this class.
     attribute_info  **attributes;           // Each value of the attributes table must be an attribute_info (§4.7) structure.
