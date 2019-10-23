@@ -1,0 +1,32 @@
+Universidade de Brasília - 02/2019
+Software Básico - Turma A
+
+Projeto:
+    Leitor/Exibidor de arquivos de extensão do tipo "class".
+
+______________________________________________________________________________________________________________________________________________________________________________
+Alunos:
+    Brenda Barbosa de Souza - 12/0111918
+    Jéssica da Silva Oliveira - 13/0028983
+    Rafael Silva de Alencar - 13/0130834
+    Rafael Batista Menegassi - 14/0159355
+    Rodrigo Neris Ferreira Cardoso - 14/0161597
+
+______________________________________________________________________________________________________________________________________________________________________________
+Divisão de Tarefas:
+    -> Brenda Souza: 
+        - Exibição de informações sobre Constant Pool e de Informações Gerais e confecção do programa principal;
+        - Arquivos: exibidor.h, exibidor.c e main.c;
+    -> Jéssica Oliveira: 
+        - Confecção de funcionalidades gerais da exibição de elementos em tela e confecção do programa principal;
+        - Arquivos: exibidor.h, exibidor.c e main.c;
+    -> Rafael Alencar: 
+        - Confecção de trechos de leitura dos arquivos, principalmente a parte inicial, com ajuda na exibição;
+        - Arquivos: leitor.h, leitor.c e exibidor.c;
+    -> Rafael Batista: 
+        - Confecção do módulo de estruturas relativas aos arquivos, ajuda na parte de leitura e no programa principal, integrando os módulos ao final;
+        - Arquivos: ClassFile.h, leitor.c e main.c;
+    -> Rodrigo Cardoso: 
+        - Confecção de grande parte das funcionalidades de leitura, ajuda no programa principal, também integrando os módulos ao final;
+        - Arquivos: leitor.h, leitor.c e main.c;
+
