@@ -1,21 +1,8 @@
-/*
-Universidade de Brasília - 02/2019
-Software Básico - Turma A
-Leitor/Exibidor de arquivo .class
-
-Alunos: 
-    Brenda 
-    Jéssica Oliveira
-    Rafael Alencar  
-    Rafael Batista  
-    Rodrigo Cardoso
-
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ClassFile.h"
+#include "structures.h"
+#include "classFileStruct.h"
 #include "instrucoes.h"
 
 const int contagem_enum = jsr_w-nop;

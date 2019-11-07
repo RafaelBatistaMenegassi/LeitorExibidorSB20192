@@ -1,20 +1,7 @@
-/*
-Universidade de Brasília - 02/2019
-Software Básico - Turma A
+#ifndef INSTRUCOES_H
+#define INSTRUCOES_H
 
-Alunos: 
-    Brenda Souza
-    Jéssica Oliveira
-    Rafael Alencar  
-    Rafael Batista  
-    Rodrigo Cardoso
-
-*/
-
-#ifndef INSTRUCOES_INIT
-#define INSTRUCOES_INIT
-
-#include "ClassFile.h"
+#include "structures.h"
 
 struct instrucao{
   char inst_nome[50];

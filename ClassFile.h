@@ -16,7 +16,7 @@ Arquivo:
     "ClassFile.h"
 
 Descrição:
-    Especificação de estruturas relativas ao processamento de arquivos de extensão class.
+    Especificação de estruturas relativas a arquivos de extensão ".class".
 */
 
 #ifndef CLASSFILE_INIT
@@ -58,7 +58,7 @@ Definição de tipagem seguindo os seguintes preceitos:
 Para maiores detalhes, verificar implementação.
 */
 
-#include <stdint.h>
+#include <stdint.h> // biblioteca que define o "tamanho das coisas"
 
 /* ------------- */
 /* TIPAGEM GERAL */
@@ -79,27 +79,27 @@ typedef uint32_t    u4;
 #define MAXU2 65535
 #define MAXU4 2147483647
 
-// Informações sobre Constant Pool
-struct cp_info
+// Informaces referentes a  Constant Pool
+typedef struct cp_info
 {
-    // Byte de tag de tipo de entrada na CP
-    u1 tag; 
+    // Byte de tag: indica qual o tipo de entrada na CP
+    u1 tag;
 
     // Union com tipos de entrada da CP
-    union 
+    union
     {
-        struct 
+        struct
         {
             u2 name;
         } Class;
 
-        struct 
+        struct
         {
             u2 class_name;
             u2 name_and_type;
         } Field;
-        
-        struct 
+
+        struct
         {
             u2 class_name;
             u2 name_and_type;
@@ -110,71 +110,68 @@ struct cp_info
             u2 class_name;
             u2 name_and_type;
         } InterfaceMethod;
-        
-        struct 
+
+        struct
         {
             u2 string;
         } String;
-        
-        struct 
+
+        struct
         {
             u4 bytes;
         } Integer;
-        
-        struct 
+
+        struct
         {
             u4 bytes;
         } Float;
-        
-        struct 
+
+        struct
         {
             u4 hi_bytes;
             u4 lo_bytes;
         } Long;
 
-        struct 
+        struct
         {
             u4 hi_bytes;
             u4 lo_bytes;
         } Double;
-        
-        struct 
+
+        struct
         {
             u2 name;
             u2 descriptor;
         } NameAndType;
-        
-        struct 
+
+        struct
         {
             u1 *bytes;
             u2 length;
         } Utf8;
-        
-        struct 
+
+        struct
         {
             u1 reference_kind;
             u2 reference;
         } MethodHandle;
 
-        struct 
+        struct
         {
             u2 descriptor;
         } MethodType;
-        
-        struct 
+
+        struct
         {
             u2 name_and_type;
             u2 bootstrap_method_attr;
-        } InvokeDynamic;        
+        } InvokeDynamic;
 
     } cp_union;
-};
+} Cp_info;
 
-typedef struct cp_info cp_info;
-
-// Enum de possíveis valores de bytes de tag de entrada na CP
+// Enum para os possiveis valores da tag de entrada da CP
 enum tag_values {
-
 	CONSTANT_Utf8                   = 1,
 	CONSTANT_Integer                = 3,
 	CONSTANT_Float                  = 4,
@@ -192,7 +189,8 @@ enum tag_values {
 };
 
 // Enum de possíveis valores de flags de acesso
-enum access_flags{
+typedef enum access_flags
+{
 	PUBLIC      = 1,
 	PRIVATE     = 2,
 	PROTECTED   = 4,
@@ -202,65 +200,51 @@ enum access_flags{
 	TRANSIENT   = 128,
 	SYNTHETIC   = 4096,
 	ENUM        = 16384
-};
-
-typedef enum access_flags access_flags;
+} Access_flags;
 
 // Informações sobre Atributos
-struct attribute_info
+typedef struct attribute_info
 {
     u2 attribute_name;
     u4 attribute_length;
     void *info;
-};  
-
-typedef struct attribute_info attribute_info;
+} Attribute_info;
 
 // Informações sobre Campos (Fields)
-struct field_info
+typedef struct field_info
 {
     u2 name;
     u2 descriptor;
     u2 attributes_count;
     u2 access_flags;
-
-    attribute_info **attributes;
-};
-
-typedef struct field_info field_info;
+    Attribute_info **attributes;
+} Field_info;
 
 // Informações sobre Exceções
-struct exception_info
+typedef struct exception_info
 {
     u2 start_pc;
     u2 end_pc;
     u2 handler_pc;
-
     u2 catch_type;
-};
+} Exception_info;
 
-typedef struct exception_info exception_info;
-
-// Informações sobre Número de Linhas (Line Number)
-struct line_number_info
+// Informações sobre Número de Linhas
+typedef struct line_number_info
 {
     u2 line_number;
     u2 start_pc;
-};
+} Line_number_info;
 
-typedef struct line_number_info line_number_info;
-
-// Informações sobre Tabela de Linhas (Line Number Table)
-struct line_number_table
+// Informações sobre Tabela de Linhas
+typedef struct line_number_table
 {
-    line_number_info *info;
+    Line_number_info *info;
     u2 line_number_length;
-};
-
-typedef struct line_number_table line_number_table;
+} Line_number_table;
 
 // Informações gerais de Código (Code)
-struct code_attribute
+typedef struct code_attribute
 {
     u1 *code;
 
@@ -271,53 +255,43 @@ struct code_attribute
 
     u4 code_length;
 
-    attribute_info **attributes;
+    Attribute_info **attributes;
 
-    exception_info *ex_info;
-};
-
-typedef struct code_attribute code_attribute;
+    Exception_info *ex_info;
+} Code_attribute;
 
 // Informações sobre Métodos (Methods)
-struct method_info
+typedef struct method_info
 {
     u2 name;
     u2 descriptor;
     u2 access_flags;
 
     u2 attributes_count;
-    attribute_info **attributes;
-};
-
-typedef struct method_info method_info;
+    Attribute_info **attributes;
+} Method_info;
 
 // Informações sobre Atributos do Fonte
-struct source_file_attribute
+typedef struct source_file_attribute
 {
     u2 source_file;
-};
-
-typedef struct source_file_attribute source_file_attribute;
+} Source_file_attribute;
 
 // Informações sobre Atributos de Constantes
-struct constant_value_attribute
+typedef struct constant_value_attribute
 {
     u2 constant_value;
-};
-
-typedef struct constant_value_attribute constant_value_attribute;
+} Constant_value_attribute;
 
 // Informações sobre Atributos de Exceções
-struct exception_attribute
+typedef struct exception_attribute
 {
     u2 num_exceptions;
     u2 *exception_info;
-};
-
-typedef struct exception_attribute exception_attribute;
+} Exception_attribute;
 
 // Informações sobre Classes
-struct classes
+typedef struct classes
 {
     u2 inner_name;
 
@@ -325,29 +299,23 @@ struct classes
     u2 inner_class_access_flags;
 
     u2 outer_class_info;
-};
-
-typedef struct classes classes;
+} Classes;
 
 // Informações sobre Atributos de Classes Internas (Inner Classes)
-struct inner_classes_attribute
+typedef struct inner_classes_attribute
 {
     u2 num_classes;
-    classes **classes_array;
-};
-
-typedef struct inner_classes_attribute inner_classes_attribute;
+    Classes **classes_array;
+} Inner_classes_attribute;
 
 // Informações sobre Atributos de Assinatura
-struct signature_attribute
+typedef struct signature_attribute
 {
     u2 signature;
-};
-
-typedef struct signature_attribute signature_attribute;
+} Signature_attribute;
 
 // Informações de Verificação de Tipos
-struct verification_type_info
+typedef struct verification_type_info
 {
     // Byte de tag de tipo de entrada
     u1 tag;
@@ -355,104 +323,96 @@ struct verification_type_info
     // Union de verificação de tipos
     union
     {
-        struct 
+        struct
         {
             u2 cp;
         } object_variable_info;
-        
-        struct 
+
+        struct
         {
             u2 offset;
         } uninitialized_variable_info;
-        
-    } type_info;
-};
 
-typedef struct verification_type_info verification_type_info;
+    } type_info;
+} Verification_type_info;
 
 // Mapeamento de Frames de Pilha
-struct stack_map_frame
+typedef struct stack_map_frame
 {
     // Tipagem de Frame
     u1 frame_type;
 
     // Union de tipos de Frames
-    union 
+    union
     {
-        struct 
+        struct
         {
-            verification_type_info **stack;
+            Verification_type_info **stack;
         } same_locals_1_stack_item_frame;
 
-        struct 
+        struct
         {
             u2 offset_delta;
-            verification_type_info **stack;
-        } same_locals_1_stack_item_frame_extended;        
+            Verification_type_info **stack;
+        } same_locals_1_stack_item_frame_extended;
 
-        struct 
+        struct
         {
             u2 offset_delta;
         } chop_frame;
 
-        struct 
+        struct
         {
             u2 offset_delta;
         } same_frame_extended;
-        
-        struct 
+
+        struct
         {
             u2 offset_delta;
-            verification_type_info **locals;
+            Verification_type_info **locals;
         } append_frame;
 
-        struct 
+        struct
         {
             u2 offset_delta;
             u2 num_locals;
             u2 num_stack_items;
 
-            verification_type_info **locals;
-            verification_type_info ** stack;
-        } full_frame;        
-    } map_frame_type;   
-};
-
-typedef struct stack_map_frame stack_map_frame;
+            Verification_type_info **locals;
+            Verification_type_info ** stack;
+        } full_frame;
+    } map_frame_type;
+} Stack_map_frame;
 
 // Informações sobre Atributos de Mapeamento de Pilha
-struct stack_map_attribute
+typedef struct stack_map_attribute
 {
     u2 num_entries;
-    stack_map_frame **entries;
-};
-
-typedef struct stack_map_attribute stack_map_attribute;
+    Stack_map_frame **entries;
+} Stack_map_attribute;
 
 /* ------------- */
-/* ARQUIVO CLASS */
+/* ARQUIVO .CLASS */
 /* ------------- */
-
-struct ClassFile
+// Estrutura referente ao arquivo .class em si
+typedef struct classfile
 {
     u4              magic;                  // The magic item supplies the magic number identifying the class file format; it has the value 0xCAFEBABE.
     u2              minor_version;          // The values of the minor_version and major_version items are the minor and major version numbers of this class file.
     u2              major_version;          // Together, a major and a minor version number determine the version of the class file format.
-    u2              constant_pool_count;    // The value of the constant_pool_count item is equal to the number of entries in the constant_pool table plus one.  
-    cp_info         *constant_pool;         // The constant_pool is a table of structures (§4.4) representing various string constants, class and interface names, field names, and other constants that are referred to within the ClassFile structure and its substructures.
+    u2              constant_pool_count;    // The value of the constant_pool_count item is equal to the number of entries in the constant_pool table plus one.
+    Cp_info         *constant_pool;         // The constant_pool is a table of structures (§4.4) representing various string constants, class and interface names, field names, and other constants that are referred to within the ClassFile structure and its substructures.
     u2              access_flags;           // The value of the access_flags item is a mask of flags used to denote access permissions to and properties of this class or interface.
     u2              this_class;             // The value of the this_class item must be a valid index into the constant_pool table.
     u2              super_class;            // For a class, the value of the super_class item either must be zero or must be a valid index into the constant_pool table.
     u2              interfaces_count;       // The value of the interfaces_count item gives the number of direct superinterfaces of this class or interface type.
     u2              *interfaces;            // Each value in the interfaces array must be a valid index into the constant_pool table.
     u2              fields_count;           // The value of the fields_count item gives the number of field_info structures in the fields table.
-    field_info      *fields;                // Each value in the fields table must be a field_info (§4.5) structure giving a complete description of a field in this class or interface.
+    Field_info      *fields;                // Each value in the fields table must be a field_info (§4.5) structure giving a complete description of a field in this class or interface.
     u2              methods_count;           // The value of the methods_count item gives the number of method_info structures in the methods table.
-    method_info     *methods;               // Each value in the methods table must be a method_info (§4.6) structure giving a complete description of a method in this class or interface.
+    Method_info     *methods;               // Each value in the methods table must be a method_info (§4.6) structure giving a complete description of a method in this class or interface.
     u2              attributes_count;       // The value of the attributes_count item gives the number of attributes (§4.7) in the attributes table of this class.
-    attribute_info  **attributes;           // Each value of the attributes table must be an attribute_info (§4.7) structure.
-};
-
-typedef struct ClassFile ClassFile;
+    Attribute_info  **attributes;           // Each value of the attributes table must be an attribute_info (§4.7) structure.
+} Classfile;
 
 #endif
